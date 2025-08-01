@@ -1,8 +1,20 @@
 
+import { db } from '../db';
+import { projectsTable } from '../db/schema';
 import { type Project } from '../schema';
+import { eq, asc } from 'drizzle-orm';
 
-export async function getFeaturedProjects(): Promise<Project[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching only featured projects from the database.
-    return [];
-}
+export const getFeaturedProjects = async (): Promise<Project[]> => {
+  try {
+    const results = await db.select()
+      .from(projectsTable)
+      .where(eq(projectsTable.is_featured, true))
+      .orderBy(asc(projectsTable.display_order))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Featured projects retrieval failed:', error);
+    throw error;
+  }
+};

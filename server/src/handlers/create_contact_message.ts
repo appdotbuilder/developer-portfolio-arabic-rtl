@@ -1,16 +1,26 @@
 
+import { db } from '../db';
+import { contactMessagesTable } from '../db/schema';
 import { type CreateContactMessageInput, type ContactMessage } from '../schema';
 
-export async function createContactMessage(input: CreateContactMessageInput): Promise<ContactMessage> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new contact message and persisting it in the database.
-    return {
-        id: 0,
+export const createContactMessage = async (input: CreateContactMessageInput): Promise<ContactMessage> => {
+  try {
+    // Insert contact message record
+    const result = await db.insert(contactMessagesTable)
+      .values({
         name: input.name,
         email: input.email,
-        subject: input.subject || null,
-        message: input.message,
-        is_read: false,
-        created_at: new Date()
-    } as ContactMessage;
-}
+        subject: input.subject,
+        message: input.message
+        // is_read defaults to false in the schema
+        // created_at defaults to now() in the schema
+      })
+      .returning()
+      .execute();
+
+    return result[0];
+  } catch (error) {
+    console.error('Contact message creation failed:', error);
+    throw error;
+  }
+};

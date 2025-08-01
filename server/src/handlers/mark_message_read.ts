@@ -1,16 +1,26 @@
 
+import { db } from '../db';
+import { contactMessagesTable } from '../db/schema';
 import { type ContactMessage } from '../schema';
+import { eq } from 'drizzle-orm';
 
 export async function markMessageRead(id: number): Promise<ContactMessage> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is marking a contact message as read in the database.
-    return {
-        id: id,
-        name: 'Sender Name',
-        email: 'sender@example.com',
-        subject: 'Message Subject',
-        message: 'Message content',
-        is_read: true,
-        created_at: new Date()
-    } as ContactMessage;
+  try {
+    const result = await db.update(contactMessagesTable)
+      .set({ 
+        is_read: true 
+      })
+      .where(eq(contactMessagesTable.id, id))
+      .returning()
+      .execute();
+
+    if (result.length === 0) {
+      throw new Error(`Contact message with id ${id} not found`);
+    }
+
+    return result[0];
+  } catch (error) {
+    console.error('Mark message read failed:', error);
+    throw error;
+  }
 }

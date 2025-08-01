@@ -1,9 +1,22 @@
 
+import { db } from '../db';
+import { developerProfileTable } from '../db/schema';
 import { type DeveloperProfile } from '../schema';
 
-export async function getProfile(): Promise<DeveloperProfile | null> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching the developer's profile from the database.
-    // Since there should be only one profile, return the first one or null if none exists.
-    return null;
-}
+export const getProfile = async (): Promise<DeveloperProfile | null> => {
+  try {
+    const results = await db.select()
+      .from(developerProfileTable)
+      .limit(1)
+      .execute();
+
+    if (results.length === 0) {
+      return null;
+    }
+
+    return results[0];
+  } catch (error) {
+    console.error('Profile retrieval failed:', error);
+    throw error;
+  }
+};
